@@ -96,8 +96,8 @@ for i_snr = 1:length(EbN0dB)
         
         %% Emetteur
         tx_tic = tic;                 % Mesure du débit d'encodage
-        msg    = randi([0,1],K,1);    % Génération du message aléatoire
-        x      = step(mod_psk,  msg); % Modulation BPSK
+        b    = randi([0,1],K,1);    % Génération du message aléatoire
+        x      = step(mod_psk,  b); % Modulation BPSK
         T_tx   = T_tx+toc(tx_tic);    % Mesure du débit d'encodage
         
         %% Canal
@@ -106,10 +106,10 @@ for i_snr = 1:length(EbN0dB)
         %% Recepteur
         rx_tic = tic;                  % Mesure du débit de décodage
         Lc      = step(demod_psk,y);   % Démodulation (retourne des LLRs)
-        rec_msg = double(Lc(1:K) < 0); % Décision
+        rec_b = double(Lc(1:K) < 0); % Décision
         T_rx    = T_rx + toc(rx_tic);  % Mesure du débit de décodage
         
-        err_stat   = step(stat_erreur, msg, rec_msg); % Comptage des erreurs binaires
+        err_stat   = step(stat_erreur, b, rec_b); % Comptage des erreurs binaires
         
         %% Affichage du résultat
         if mod(n_frame,100) == 1

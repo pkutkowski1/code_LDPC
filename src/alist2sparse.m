@@ -11,23 +11,29 @@ function [H] = alist2sparse(fname)
 %   $Revision: 1.1 $  $Date: 2000/03/23 $ Bug fixed by Hatim Behairy
 
 fid = fopen(fname);
+
+disp(['Reading : ', fgetl(fid)]);
 line = fgetl(fid);
 nbrs = sscanf(line,'%d');
 n = nbrs(1);
 m = nbrs(2);
 
+disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
 nbrs = sscanf(line,'%d');
 dmax_VN = nbrs(1);
 dmax_CN = nbrs(2);
 
+disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
 d_VN = sscanf(line,'%d',[1 n]); % number of elements in rows
 num2(1:n)=dmax_VN;
 
+disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
 d_CN = sscanf(line,'%d',[1 m]); % no need
 
+disp(['Reading : ', fgetl(fid)])
 position = zeros(n,dmax_VN);
 for i=1:n
     line = fgetl(fid);

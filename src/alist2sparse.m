@@ -12,30 +12,51 @@ function [H] = alist2sparse(fname)
 
 fid = fopen(fname);
 
-disp(['Reading : ', fgetl(fid)]);
 line = fgetl(fid);
+while (strcmp(line(1), '#'))
+    disp(['Reading : ', line]);
+    line = fgetl(fid);
+end
 nbrs = sscanf(line,'%d');
 n = nbrs(1);
 m = nbrs(2);
 
-disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
+while (strcmp(line(1), '#'))
+    disp(['Reading : ', line]);
+    line = fgetl(fid);
+end
 nbrs = sscanf(line,'%d');
 dmax_VN = nbrs(1);
 dmax_CN = nbrs(2);
 
-disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
+while (strcmp(line(1), '#'))
+    disp(['Reading : ', line]);
+    line = fgetl(fid);
+end
 d_VN = sscanf(line,'%d',[1 n]); % number of elements in rows
 num2(1:n)=dmax_VN;
 
-disp(['Reading : ', fgetl(fid)])
 line = fgetl(fid);
+while (strcmp(line(1), '#'))
+    disp(['Reading : ', line]);
+    line = fgetl(fid);
+end
 d_CN = sscanf(line,'%d',[1 m]); % no need
 
-disp(['Reading : ', fgetl(fid)])
+line = fgetl(fid);
+while (strcmp(line(1), '#'))
+    disp(['Reading : ', line]);
+    line = fgetl(fid);
+end
 position = zeros(n,dmax_VN);
-for i=1:n
+nbrs = sscanf(line,'%d');
+for j=1:length(nbrs)
+    position(1,j) = nbrs(j);
+end
+
+for i=2:n
     line = fgetl(fid);
     nbrs = sscanf(line,'%d');
     for j=1:length(nbrs)

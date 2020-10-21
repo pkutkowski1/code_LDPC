@@ -32,7 +32,7 @@ EsN0dB = 10*log10(EsN0); % Points de EsN0 en dB à simuler
 % -------------------------------------------------------------------------
 %% Initialisation des vecteurs de résultats
 ber = zeros(1,length(EbN0dB));
-Pe = qfunc(sqrt(2*EbN0));
+Pe = 0.5*erfc(sqrt(EbN0));
 
 %% Préparation de l'affichage
 figure(1)
@@ -55,7 +55,7 @@ fprintf(      '|------------|---------------|------------|----------|-----------
 %% Simulation
 for i_snr = 1:length(EbN0dB)
     reverseStr = ''; % Pour affichage en console
-    sigma2 = 1/(2*10^(EsN0dB(i_snr)/10));
+    sigma2 = 1/(2*EsN0(i_snr));
     
     err_stat    = [0 0 0]; % vecteur résultat de stat_erreur
     

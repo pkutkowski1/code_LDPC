@@ -29,3 +29,5 @@ Les résultats pour le code ```CCSDS_64_128.alist``` et un nombre d'itérations 
 
  Les résultats pour le code ```MAC_KAY_504_1008.alist``` et un nombre d'itérations de BP de 50 et 100 :
 ![Courbes de BER FER](https://rtajan.github.io/assets/img/MAC_KAY_504_1008.png)
+
+Certaines de ces courbes peuvent être générées [ici](https://aff3ct.github.io/comparator.html). Si vous le souhaitez, vous pouvez télécharger aff3ct sur le lien [suivant](https://aff3ct.github.io/download.html) et refaire les simulations.

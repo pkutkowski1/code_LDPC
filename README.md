@@ -19,7 +19,7 @@ Lancer la simulation avec
 Vous trouverez les transparents du cours sur les codes LDPC sur le lien [suivant](https://github.com/rtajan/rtajan.github.io/blob/master/assets/cours/TS345/TP/TP_TS345.pdf).
 
 ## Le TP
-Le sujet de travaux pratiques est disponible [ici](/assets/cours/TS345/TP/TP_TS345.pdf). Afin de faciliter votre travail de test, vous trouverez, ci-après, des courbes de performances pour les codes donnés dans les fichiers ```DEBUG_6_3.alist```, ```CCSDS_64_128.alist``` et ```MAC_KAY_504_1008.alist```.
+Le sujet de travaux pratiques est disponible [ici](https://rtajan.github.io/assets/cours/TS345/TP/TP_TS345.pdf). Afin de faciliter votre travail de test, vous trouverez, ci-après, des courbes de performances pour les codes donnés dans les fichiers ```DEBUG_6_3.alist```, ```CCSDS_64_128.alist``` et ```MAC_KAY_504_1008.alist```.
 
 Les résultats pour le code ```DEBUG_6_3.alist``` et un nombre d'itérations de BP allant de 1 à 50 :
 ![Courbes de BER FER](https://rtajan.github.io/assets/img/DEBUG_6_3.png)

@@ -8,6 +8,7 @@ simulation_name = 'codee';
 
 R = 1; % Rendement de la communication
 
+nb_it = 2;
 pqt_par_trame = 1; % Nombre de paquets par trame
 bit_par_pqt   = 330;% Nombre de bits par paquet
 K = pqt_par_trame*bit_par_pqt; % Nombre de bits de message par trame
@@ -97,7 +98,7 @@ for i_snr = 1:length(EbN0dB)
         %% Emetteur
         tx_tic = tic;                 % Mesure du débit d'encodage
         b    = randi([0,1],K,1);    % Génération du message aléatoire
-        u    = b
+        u    = b*g ; 
         
         x      = step(mod_psk,  b); % Modulation BPSK
         T_tx   = T_tx+toc(tx_tic);    % Mesure du débit d'encodage
@@ -156,6 +157,7 @@ end
 fprintf('|------------|---------------|------------|----------|----------------|-----------------|--------------|\n')
 
 %%
+
 figure(1)
 semilogy(EbN0dB,ber);
 hold all

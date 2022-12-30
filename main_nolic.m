@@ -1,15 +1,17 @@
-clear
+clear ;
+close all;
 clc
 
 %% Parametres
 % -------------------------------------------------------------------------
 addpath('src')
-simulation_name = 'non_codee';
+simulation_name = 'codee_6_3_nb_5';
+nb_it = 5;  
 
 R = 1; % Rendement de la communication
 
 pqt_par_trame = 1; % Nombre de paquets par trame
-bit_par_pqt   = 330;% Nombre de bits par paquet
+bit_par_pqt   = 3;% Nombre de bits par paquet
 K = pqt_par_trame*bit_par_pqt; % Nombre de bits de message par trame
 N = K/R; % Nombre de bits codés par trame (codée)
 
@@ -28,6 +30,16 @@ EbN0dB = EbN0dB_min:EbN0dB_step:EbN0dB_max;     % Points de EbN0 en dB à simuler
 EbN0   = 10.^(EbN0dB/10);% Points de EbN0 à simuler
 EsN0   = R*log2(M)*EbN0; % Points de EsN0
 EsN0dB = 10*log10(EsN0); % Points de EsN0 en dB à simuler
+
+
+%% Matrice encodage 
+
+[H] = alist2sparse('alist/DEBUG_6_3.alist');
+
+[h, g] = ldpc_h2g(H); 
+
+H = full(H);
+
 
 % -------------------------------------------------------------------------
 %% Initialisation des vecteurs de résultats
@@ -52,6 +64,7 @@ fprintf(msg_header);
 fprintf(      '|------------|---------------|------------|----------|----------------|-----------------|--------------|\n')
 
 
+
 %% Simulation
 for i_snr = 1:length(EbN0dB)
     reverseStr = ''; % Pour affichage en console
@@ -69,7 +82,10 @@ for i_snr = 1:length(EbN0dB)
         %% Emetteur
         tx_tic = tic;                 % Mesure du débit d'encodage
         b      = randi([0,1],K,1);    % Génération du message aléatoire
-        x      = 1 - 2*b; % Modulation BPSK
+        
+        c = encode(b, 6, 3, 'linear', g);
+
+        x      = 1 - 2*c; % Modulation BPSK
         T_tx   = T_tx+toc(tx_tic);    % Mesure du débit d'encodage
         
         %% Canal
@@ -79,7 +95,14 @@ for i_snr = 1:length(EbN0dB)
         %% Recepteur
         rx_tic = tic;                  % Mesure du débit de décodage
         Lc      = 2*y/sigma2;   % Démodulation (retourne des LLRs)
-        rec_b = double(Lc(1:K) < 0); % Décision
+        
+        B = BP_algorithm(H, Lc, sigma2, nb_it); 
+        
+        
+        rec_b1 = double(B < 0); % Décision
+       
+        disp = evalc('rec_b = decode(rec_b1, 6, 3, ''linear'', g)');
+                
         T_rx    = T_rx + toc(rx_tic);  % Mesure du débit de décodage
         
         err_stat(2) = err_stat(2) + sum(b(:) ~= rec_b(:));

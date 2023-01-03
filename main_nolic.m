@@ -5,8 +5,8 @@ clc
 %% Parametres
 % -------------------------------------------------------------------------
 addpath('src')
-simulation_name = 'codee_6_3_nb_5';
-nb_it = 5;  
+simulation_name = 'codee6_3_nb_1';
+nb_it = 1;  
 
 R = 1; % Rendement de la communication
 
@@ -84,7 +84,8 @@ for i_snr = 1:length(EbN0dB)
         b      = randi([0,1],K,1);    % Génération du message aléatoire
         
         c = encode(b, 6, 3, 'linear', g);
-
+        
+        
         x      = 1 - 2*c; % Modulation BPSK
         T_tx   = T_tx+toc(tx_tic);    % Mesure du débit d'encodage
         
@@ -96,7 +97,7 @@ for i_snr = 1:length(EbN0dB)
         rx_tic = tic;                  % Mesure du débit de décodage
         Lc      = 2*y/sigma2;   % Démodulation (retourne des LLRs)
         
-        B = BP_algorithm(H, Lc, sigma2, nb_it); 
+        B = BP_algorithm(H, Lc, nb_it); 
         
         
         rec_b1 = double(B < 0); % Décision

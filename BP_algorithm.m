@@ -14,13 +14,8 @@ end
 
 [dim_c,dim_l] = size(P_p2v); 
 
-for i=1:dim_l 
-    O(i) = sum(P_p2v(:,i)) + Y0(i) ;     
-end
 
-
-
+O = sum(P_p2v) + Y0;     
 
 
 end
-

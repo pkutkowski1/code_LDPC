@@ -82,9 +82,17 @@ fprintf(      '|------------|---------------|------------|----------|-----------
 
 [h, g] = ldpc_h2g(H); 
 
-H = full(H);
+H                    = full(H);
 
-nb_it = 1;
+[nb_ligneH, nb_colH]  = size(H); 
+[nb_entree, nb_bits] = size(g); 
+[row_H,col_H]        = find(H);
+nb_ones_H            = length(row_H);
+nb_it                = 1;
+
+
+
+%rowH,colH,nb_ones_H, Lc, nb_colH,nb_ligneH, nb_bits)
 
 %% Simulation
 for i_snr = 1:length(EbN0dB)
@@ -117,15 +125,14 @@ for i_snr = 1:length(EbN0dB)
         rx_tic = tic;                  % Mesure du débit de décodage
         Lc      = step(demod_psk,y);   % Démodulation (retourne des LLRs)
         
-        B = BP_algorithm(H, Lc, nb_it); 
+        B = BP_algorithm2(row_H,col_H,nb_ones_H, Lc, nb_colH,nb_ligneH, nb_bits, nb_it); 
         rec_b1 = double(B < 0); % Décision
-        disp = evalc('rec_b = decode(rec_b1, 6, 3, ''linear'', g)');
         
         % rec_b = double(Lc(1:K) < 0); % Décision
         
         T_rx    = T_rx + toc(rx_tic);  % Mesure du débit de décodage
         
-        err_stat   = step(stat_erreur, b, transpose(rec_b)); % Comptage des erreurs binaires
+        err_stat   = step(stat_erreur, c, transpose(rec_b1)); % Comptage des erreurs binaires
         
         %% Affichage du résultat
         if mod(n_frame,100) == 1

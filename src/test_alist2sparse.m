@@ -3,5 +3,6 @@ close all
 clc
 
 
-[H] = alist2sparse('alist/DEBUG_6_3.alist');
-[h, g] = ldpc_h2g(H)
+[H] = alist2sparse('../alist/CCSDS_64_128.alist');
+[h, g] = ldpc_h2g(H);
+g

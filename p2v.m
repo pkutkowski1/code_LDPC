@@ -22,4 +22,3 @@ for i = 1:size_c     %boucle sur les colones
 end 
     
 end 
-

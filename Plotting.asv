@@ -24,17 +24,9 @@ legend show
 
 
 load('CCSDS10.mat')
+load('6310.mat')
+load('
 figure, 
 semilogy(EbN0dB, ber, 'DisplayName','CCSDS')
-hold on 
-load('6310.mat')
-semilogy(EbN0dB, ber, 'DisplayName','63')
-load('MK10.mat')
-semilogy(EbN0dB, ber, 'DisplayName','MAK-KAY')
 
-hold off 
-grid on
-xlabel('$\frac{E_b}{N_0}$ en dB','Interpreter', 'latex', 'FontSize',14)
-ylabel('TEB','Interpreter', 'latex', 'FontSize',14)
-legend show 
 

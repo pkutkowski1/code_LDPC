@@ -1,15 +1,17 @@
 clear
 clc
-
+dbstop if error;
 %% Parametres
 % -------------------------------------------------------------------------
 addpath('src')
-simulation_name = 'non_codee';
+simulation_name = '6310';
+[H] = alist2sparse('./alist/6_3.alist');
+nb_it           = 10;
 
 R = 1; % Rendement de la communication
 
 pqt_par_trame = 1; % Nombre de paquets par trame
-bit_par_pqt   = 330;% Nombre de bits par paquet
+bit_par_pqt   = 504;% Nombre de bits par paquet
 K = pqt_par_trame*bit_par_pqt; % Nombre de bits de message par trame
 N = K/R; % Nombre de bits codés par trame (codée)
 
@@ -17,8 +19,8 @@ M = 2; % Modulation BPSK <=> 2 symboles
 phi0 = 0; % Offset de phase our la BPSK
 
 EbN0dB_min  = -2; % Minimum de EbN0
-EbN0dB_max  = 10; % Maximum de EbN0
-EbN0dB_step = 1;% Pas de EbN0
+EbN0dB_max  =  6; % Maximum de EbN0
+EbN0dB_step =  1;% Pas de EbN0
 
 nbr_erreur  = 100;  % Nombre d'erreurs à observer avant de calculer un BER
 nbr_bit_max = 100e6;% Nombre de bits max à simuler
@@ -30,9 +32,34 @@ EsN0   = R*log2(M)*EbN0; % Points de EsN0
 EsN0dB = 10*log10(EsN0); % Points de EsN0 en dB à simuler
 
 % -------------------------------------------------------------------------
+
+%% Construction du modulateur
+mod_psk = comm.PSKModulator(...
+    'ModulationOrder', M, ... % BPSK
+    'PhaseOffset'    , phi0, ...
+    'SymbolMapping'  , 'Gray',...
+    'BitInput'       , true);
+
+%% Construction du demodulateur
+demod_psk = comm.PSKDemodulator(...
+    'ModulationOrder', M, ...
+    'PhaseOffset'    , phi0, ...
+    'SymbolMapping'  , 'Gray',...
+    'BitOutput'      , true,...
+    'DecisionMethod' , 'Log-likelihood ratio');
+
+%% Construction du canal AWGN
+awgn_channel = comm.AWGNChannel(...
+    'NoiseMethod', 'Signal to noise ratio (Es/No)',...
+    'EsNo',EsN0dB(1),...
+    'SignalPower',1);
+
+%% Construction de l'objet évaluant le TEB
+stat_erreur = comm.ErrorRate(); % Calcul du nombre d'erreur et du BER
+
 %% Initialisation des vecteurs de résultats
 ber = zeros(1,length(EbN0dB));
-Pe = 0.5*erfc(sqrt(EbN0));
+Pe = qfunc(sqrt(2*EbN0));
 
 %% Préparation de l'affichage
 figure(1)
@@ -51,14 +78,34 @@ msg_header =  '|  Eb/N0 dB  |    Bit nbr    |  Bit err   |   TEB    |    Debit T
 fprintf(msg_header);
 fprintf(      '|------------|---------------|------------|----------|----------------|-----------------|--------------|\n')
 
+%% Matrice encodage 
+
+
+
+[h, g] = ldpc_h2g(H); 
+
+H                    = full(h);
+
+[nb_ligneH, nb_colH] = size(H); 
+[nb_entree, nb_bits] = size(g); 
+[row_H,col_H]        = find(H);
+nb_ones_H            = length(row_H);
+
+
+
+
+%rowH,colH,nb_ones_H, Lc, nb_colH,nb_ligneH, nb_bits)
 
 %% Simulation
 for i_snr = 1:length(EbN0dB)
     reverseStr = ''; % Pour affichage en console
-    sigma2 = 1/(2*EsN0(i_snr));
+    awgn_channel.EsNo = EsN0dB(i_snr);% Mise a jour du EbN0 pour le canal
+    demod_psk.Variance = awgn_channel.Variance;
     
-    err_stat    = [0 0 0]; % vecteur résultat de stat_erreur
-    
+    sigma2 = 1/(2*EbN0(i_snr));
+    stat_erreur.reset; % reset du compteur d'erreur
+    err_stat    = [0;0;0]; % vecteur résultat de stat_erreur
+        
     n_frame = 0;
     T_rx = 0;
     T_tx = 0;
@@ -68,23 +115,26 @@ for i_snr = 1:length(EbN0dB)
         
         %% Emetteur
         tx_tic = tic;                 % Mesure du débit d'encodage
-        b      = randi([0,1],K,1);    % Génération du message aléatoire
-        x      = 1 - 2*b; % Modulation BPSK
+        b    = randi([0,1],K,1);    % Génération du message aléatoire
+        c    = encode(b, nb_colH, nb_ligneH, 'linear', g); 
+        x      = step(mod_psk,  c); % Modulation BPSK % Modulation BPSK
         T_tx   = T_tx+toc(tx_tic);    % Mesure du débit d'encodage
         
         %% Canal
-        n     = sqrt(sigma2) * randn(size(x));
-        y     = x + n; % Ajout d'un bruit gaussien
+        y     = step(awgn_channel,x); % Ajout d'un bruit gaussien
         
         %% Recepteur
         rx_tic = tic;                  % Mesure du débit de décodage
-        Lc      = 2*y/sigma2;   % Démodulation (retourne des LLRs)
-        rec_b = double(Lc(1:K) < 0); % Décision
+        %Lc      = 2*y/sigma2 ;  % Démodulation (retourne des LLRs)
+        Lc      = step(demod_psk,y);
+        B = BP_algorithm2(row_H,col_H,nb_ones_H, Lc, nb_colH,nb_ligneH, nb_bits, nb_it,H); 
+        rec_b1 = double(B < 0); % Décision
+        
+        % rec_b = double(Lc(1:K) < 0); % Décision
+        
         T_rx    = T_rx + toc(rx_tic);  % Mesure du débit de décodage
         
-        err_stat(2) = err_stat(2) + sum(b(:) ~= rec_b(:));
-        err_stat(3) = err_stat(3) + K;
-        err_stat(1) = err_stat(2)/err_stat(3);
+        err_stat   = step(stat_erreur, c, transpose(rec_b1)); % Comptage des erreurs binaires
         
         %% Affichage du résultat
         if mod(n_frame,100) == 1
@@ -135,5 +185,6 @@ ylim([1e-6 1])
 grid on
 xlabel('$\frac{E_b}{N_0}$ en dB','Interpreter', 'latex', 'FontSize',14)
 ylabel('TEB','Interpreter', 'latex', 'FontSize',14)
+
 
 save(simulation_name,'EbN0dB','ber')

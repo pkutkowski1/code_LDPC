@@ -50,40 +50,12 @@ awgn_channel = comm.AWGNChannel(...
 
 %% LDPC
 
-[H] = alist2sparse('alist/DEBUG_6_3.alist');
+[H] = alist2sparse('alist/6_3.alist');
 
 [h, g] = ldpc_h2g(H); 
 
-
-%% Emmeteur 
-b = randi([0,1],K,1);
-
-
-% encodage 
-sequence_e   = transpose(b)*g;  
-sequence_e2         = encode(b, 6, 3, 'linear', g);
-
-% modulation BPSK 
-x      = step(mod_psk,sequence_e2);
-
-
-% Ajout de la contribution du canal 
-sigma2  = 1/(2*EsN0(1)); 
-n       = sqrt(sigma2)*randn(size(x));
-n       = x + n; 
-
-
-% Démodulation QPSK 
-Lc_1      = double(n < 0);
-
-% Log de vraisemblance 
-Lc        = 2*n/sigma2 ; 
-
-% Décodage de canal 
-sequence_r   = BP_algorithm(H, Lc, sigma2); 
-
-% Décision 
-rec_b   = double(sequence_r(1:N) < 0);
+tg = tanner_graph(H); % Building the Tanner graph
+plot(tg) % Display the Tanner graph
 
 
 
